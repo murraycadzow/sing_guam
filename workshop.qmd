@@ -1,0 +1,9 @@
+---
+title: "SING Bioinformatics Workshop"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-expand: true
+    embed-resources: true
+---
