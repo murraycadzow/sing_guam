@@ -7,3 +7,11 @@ format:
     toc-expand: true
     embed-resources: true
 ---
+
+
+The following is run in `Terminal` to load the needed software
+```
+BASE=/projects/teaching/sing_guam                                                                                                                          
+## Make conda available                                                                                                                                    
+conda activate ${BASE}/workshop_env           
+```
