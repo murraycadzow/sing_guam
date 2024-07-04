@@ -1,0 +1,43 @@
+---
+title: "SING Bioinformatics Workshop - Getting Started"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-expand: true
+    embed-resources: true
+    echo: false
+---
+
+```{r setup}
+#| include: false
+#| echo: true
+```
+
+This is the Otago OnDemand Dashboard. We're going to use this environment to open RStudio which gives us an environment to run through some examples of a bioinformatics workflow. RStudio provides access to R - a commonly used statisical programming language, and it also provides an interface to a commandline environment __Terminal__
+
+1. Select the __RStudio Server__ app
+
+```{r}
+knitr::include_graphics("images/ondemand.png")
+```
+
+2. Modify the "Number of Hours" to be **3**
+  - Click Launch
+
+```{r}
+knitr::include_graphics("images/start_rstudio.png")
+```
+
+3. Once the box turns green and "Running", select "Connect to RStudio Server"
+
+```{r}
+knitr::include_graphics("images/open_rstudio.png")
+```
+
+4. You are now ready to begin the workshop
+
+```{r}
+knitr::include_graphics("images/rstudio_default.png")
+```
+
