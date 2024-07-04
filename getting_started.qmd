@@ -14,7 +14,7 @@ format:
 #| echo: true
 ```
 
-This is the Otago OnDemand Dashboard. We're going to use this environment to open RStudio which gives us an environment to run through some examples of a bioinformatics workflow. RStudio provides access to R - a commonly used statisical programming language, and it also provides an interface to a commandline environment __Terminal__
+This is the Otago OnDemand Dashboard. We're going to use this environment to open RStudio which gives us an environment to run through some examples of a bioinformatics workflow. RStudio provides access to R (__Console__) - a commonly used statistical programming language that we will use to perform some analysis, and it also provides an interface to a command-line environment __Terminal__ where we will run some bioinformatic programs.
 
 1. Select the __RStudio Server__ app
 
