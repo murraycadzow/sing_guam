@@ -9,9 +9,130 @@ format:
 ---
 
 
+```{r}
+.libPaths("/projects/teaching/sing_guam/workshop_env/R/")
+# install.packages("PACKAGE", lib = "/projects/teaching/sing_guam/workshop_env/R/")
+library(tidyverse)
+```
+
+
 The following is run in `Terminal` to load the needed software
 ```
 BASE=/projects/teaching/sing_guam                                                                                                                          
-## Make conda available                                                                                                                                    
+## Make conda available
+source ${BASE}/miniconda3/etc/profile.d/conda.sh
 conda activate ${BASE}/workshop_env           
 ```
+
+## Exploring Sequencing Data
+
+
+Fastq format
+
+```
+less -S fastq/
+```
+
+Aligned sequences
+
+```
+hom 0/0 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
+het 0/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam
+hom 1/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
+```
+
+
+```
+aligned
+```
+
+
+
+```
+samtools tview rs2231142_hom_ref_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+
+```
+samtools tview rs2231142_het_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+
+```
+samtools tview rs2231142_hom_alt_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+## Principal components analysis
+
+Principal component analysis is a statistical dimension reduction technique that transforms potentially
+correlated variables into a linear and non-correlated set of variables. In a genetic context PCA is
+used to reduce variation at many thousands of markers into a handful of components that represent
+the majority of the variation of the data (Patterson et al., 2006). The components are ordered such
+that the first principal component (PC) captures the most variation, with each subsequent component
+capturing less. These components often, but not necessarily, represent population differences and
+population substructure.
+
+To calculate the principal components of the genetic data, all populations and chromosomes were combined into a single VCF
+file with BCFtools v1.3.1, and then the independent markers were identified via Plink v1.9b4.9, using
+a sliding window to remove markers that had an inter-marker LD R2 > 0.2, with windows of 50 kb
+and a slide of 5 markers. The first 10 principle components were calculated using smartPCA v13050
+from Eigensoft v6.0.1 (Price et al., 2006). The following code was used to accomplish these steps.
+
+```
+#combine the chromosomes
+bcftools concat \
+-O z \
+-o -o NZ_1KGP_allchr.vcf.gz \
+--threads 10 $(ls NZ_1KGP.chr*gz | sort -n -t'r' -k2)
+#find the independent markers
+plink1.9b4.9 --vcf NZ_1KGP_allchr.vcf.gz \
+--maf 0.1 \
+--indep-pairwise 50 5 0.2 \
+--out NZ_1KGP_allchr
+
+# create an empty affection file that is required for Plink to use the --make-pheno
+# which in turn is required for the creation of the ped file just the way
+# SmartPCA wants it
+touch cases.txt
+plink1.9b4.9 --vcf NZ_1KGP_allchr.vcf.gz \
+--extract NZ_1KGP_allchr.prune.in \
+--recode \
+--out NZ_1KGP_allchr_indep \
+--make-pheno cases.txt '*'
+# create the eigenstrat file
+echo -e "genotype: 1KGP_allchr_indep.ped\nsnpname: \
+1KGP_allchr_indep.map\nindivname: \
+1KGP_allchr_indep.ped\noutputformat: \
+EIGENSTRAT\ngenotypeoutname: \
+1KGP_allchr_indep.eigenstratgeno\nsnpoutname: \
+1KGP_allchr_indep.snp\nindivoutname: \
+1KGP_allchr_indep.ind\nfamilynames: \
+NO" > par.PED.EIGENSTRAT
+# calculate the principle components
+convertf -p par.PED.EIGENSTRAT > eigen.log
+smartpca.perl \
+-i 1KGP_allchr_indep.eigenstratgeno \
+-a 1KGP_allchr_indep.snp \
+-b 1KGP_allchr_indep.ind \
+-o 1KGP_allchr_indep_eigen.pca \
+-p 1KGP_allchr_indep_eigen \
+-e 1KGP_allchr_indep_eigen.eval \
+-l 1KGP_allchr_indep_eigen.log \
+-m 0
+
+```
+
+
+```{r}
+pca_data <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", col_names = c("sample", paste0("PC",1:10),"case_control"), comment = "#", col_select = -"case_control") %>% left_join(
+read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/integrated_call_samples_v3.20130502.ALL.panel", col_names = TRUE, col_select = c("sample", "pop","super_pop")), by = "sample")
+
+pc_loadings <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", col_names = FALSE, n_max = 1)
+```
+```{r}
+theme_set(theme_bw())
+
+ggplot(data = pca_data, aes(x = PC1, y = PC2, colour = super_pop)) + geom_point()
+
+```
+
