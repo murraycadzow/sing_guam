@@ -6,6 +6,7 @@ format:
     toc-depth: 3
     toc-expand: true
     embed-resources: true
+    theme: litera
 ---
 
 
@@ -16,7 +17,14 @@ library(tidyverse)
 ```
 
 
+
+## Setup and Environment
+
 The following is run in `Terminal` to load the needed software
+
+<!-- This will become a single script to hide the detail -->
+<!-- e.g. source ~/sing_guam/load_software.sh -->
+
 ```
 BASE=/projects/teaching/sing_guam                                                                                                                          
 ## Make conda available
@@ -24,7 +32,25 @@ source ${BASE}/miniconda3/etc/profile.d/conda.sh
 conda activate ${BASE}/workshop_env           
 ```
 
+<!-- Include a picture of rstudio and through out include pictures to indicate which tab console/terminal people need to be in -->
 
+
+Below is a schematic of the structure of the workshop files and directories (folders)
+<!-- this structure is currently reflective of intention - will be updated once everything is ironed out -->
+```
+~/sing_guam/
+  |-data/
+  |   |- aligned/
+  |   |- fastq/
+  |   |- reference/
+  |- workshop.html
+  |- workshop.qmd
+  -- load_software.sh
+```
+
+### What is the 1000 Genomes Project
+
+<!-- Very brief introduction into where the data being used comes from -->
 
 ## From the sequencer to analysis-ready data
 
@@ -190,7 +216,19 @@ ggplot(data = pca_data, aes(x = PC1, y = PC2, colour = super_pop)) + geom_point(
 
 Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the ABCG2 gene we mapped earlier:
 
+ensembl: 
+Genomic context: https://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Variant info: https://grch37.ensembl.org/Homo_sapiens/Variation/Explore?r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Population frequencies: https://grch37.ensembl.org/Homo_sapiens/Variation/Population?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Phenotypes: https://grch37.ensembl.org/Homo_sapiens/Variation/Phenotype?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+
+
+dbsnp: https://www.ncbi.nlm.nih.gov/snp/rs2231142#frequency_tab
+
+
 **TBC: gnomAD browser? Some simple code?**
+
+https://gnomad.broadinstitute.org/variant/4-88131171-G-T?dataset=gnomad_r4
 
 1.  Is the frequency of this variant the same across the globe? Are there populations with a higher frequency than others?
 2.  Is this variant relevant to human health? Let’s explore some resources for finding information of clinical relevance.
@@ -278,3 +316,13 @@ Now run the following code in the R `Console` to create a dendrogram, a tree tha
 1.  How much variation is present in your population?
 2.  How many major groups are present?
 3.  Looking at the vertical axis, how much variation is actually present in the group? How different is this to other groups?
+
+
+# Appendix
+
+## BASH reference
+
+
+
+## R reference
+
