@@ -26,10 +26,8 @@ The following is run in `Terminal` to load the needed software
 <!-- e.g. source ~/sing_guam/load_software.sh -->
 
 ```
-BASE=/projects/teaching/sing_guam                                                                                                                          
-## Make conda available
-source ${BASE}/miniconda3/etc/profile.d/conda.sh
-conda activate ${BASE}/workshop_env           
+cd sing_guam
+source load_software.sh
 ```
 
 <!-- Include a picture of rstudio and through out include pictures to indicate which tab console/terminal people need to be in -->
@@ -77,7 +75,13 @@ Strings of DNA base pairs, identifiers, and encoded information about the qualit
 
 The pipeline can be represented in the figure below:
 
-![](images/analysis-pipeline.png){width="398"}
+
+```{r}
+#| out.width: "398px"
+knitr::include_graphics("images/analysis-pipeline.png")
+```
+
+
 
 Fastq format
 
@@ -93,6 +97,8 @@ Let’s take a closer look at how some portions of the pipeline will look from t
 
 `bwa mem in.ref fasta.1 fasta.2 > ./mapped_reads.sam`
 
+`samtools flagstat mapped_reads.sam`
+
 After this has finished, let’s take a look at the output with a viewer
 
 `samtools tview ./mapped_reads.sam`
@@ -104,12 +110,29 @@ We see that each read has been placed somewhere along the reference, there is a 
 We can call variants along the entire genome to get a sense of how much variation is present in the sample(s) of interest. Unfortunately, we won’t have time to do any variant calling ourselves today, but you can already see the logic of how this works here.
 
 When you're ready, exit the viewer by pressing the <kbd>Q</kbd> key.
+
+<!-- data prep 
 ```
 hom 0/0 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
 het 0/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam
 hom 1/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
+
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_ref_example.bam
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam 4:89051323-89053323 > rs2231142_het_example.bam
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_alt_example.bam
+samtools index -m *.bam
+
+# create the fastq data set
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam MT > example.bam
+samtools sort -n -o example.read_ordered.bam
+bedtools bamtofastq -i example_mt.read_ordered.bam -fq example.R1.fastq -fq2 example.R2.fastq
+
+bwa index ../../reference/human_g1k_v37.fasta
+bwa mem ../../reference/human_g1k_v37.fasta example.R1.fastq example.R2.fastq > example.sam
+
 ```
 
+-->
 
 ```
 aligned
@@ -320,7 +343,22 @@ Now run the following code in the R `Console` to create a dendrogram, a tree tha
 
 # Appendix
 
-## BASH reference
+## BASH quick reference
+
+Navigation
+
+- `pwd` tells you where you are in the file system
+
+- `ls` will show you the names of files and directories where you are
+  - `ls -F` will append a `/` onto the end of the names that are directories
+
+- `cd` by itself will take you back to your home directory (`~/`)
+
+- `cd directory_name` will place you in that directory, e.g `cd ~/sing_guam` will move you to the workshop area if you got mis-placed
+
+- `./` infront of a file or directory means bash will look in the current directory (that shown by `pwd`)
+
+- `../` infront of a file or directory means the parent directory (look one directory "up"), `../../` means look "2-up", etc.
 
 
 
