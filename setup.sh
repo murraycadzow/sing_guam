@@ -12,8 +12,14 @@ rm -rf ${BASE}/miniconda3/miniconda.sh
 source ${BASE}/miniconda3/etc/profile.d/conda.sh
 conda create -p ${BASE}/workshop_env
 conda activate ${BASE}/workshop_env
-conda install --solver=libmamba -c conda-forge -c bioconda samtools bcftools vcftools tabix eigensoft plink
+conda install --solver=libmamba -c conda-forge -c bioconda samtools bcftools vcftools tabix eigensoft plink bedtools bwa
 
+# create directory structures
+mkdir -p workshop/{fastq,aligned,}
+
+
+# grab 1000 genomes data
+samtools -bh 
 
 ## Create a working area for each account
 for account in $(cat $1)

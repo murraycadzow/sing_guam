@@ -1,0 +1,267 @@
+---
+title: "SING Bioinformatics Workshop - Part 1"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-expand: true
+    embed-resources: true
+    theme: litera
+---
+
+
+
+
+
+## Setup and Environment (10 min)
+
+The following is run in `Terminal` to load the needed software
+
+<!-- This will become a single script to hide the detail -->
+<!-- e.g. source ~/sing_guam/load_software.sh -->
+
+```
+cd sing_guam
+source load_software.sh
+```
+
+<!-- Include a picture of rstudio and through out include pictures to indicate which tab console/terminal people need to be in -->
+
+
+Below is a schematic of the structure of the workshop files and directories (folders)
+<!-- this structure is currently reflective of intention - will be updated once everything is ironed out -->
+
+
+
+
+```
+sing_guam/
+├── aligned/
+│   ├── example.rs2231142_het.bam
+│   ├── example.rs2231142_hom_alt.bam
+│   └── example.rs2231142_hom_ref.bam
+├── fastq/
+│   ├── example.R1.fq
+│   └── example.R2.fq
+├── load_software.sh
+├── ref/
+│   └── human_g1k_v37.fasta
+├── vcf/
+│   ├── 1kgp.chrMT.vcf.gz
+│   └── example_3_sample.vcf
+├── workshop_part1.qmd
+└── workshop_part2.qmd
+```
+
+### What is the 1000 Genomes Project (10 min)
+
+
+
+<!-- Very brief introduction into where the data being used comes from -->
+
+```{r, fig.cap="1000 Genomes Sample Populations. By Taras K. Oleksyk, Vladimir Brukhin and Stephen J. O’Brien - Oleksyk TK, Brukhin V, O’Brien SJ. The Genome Russia project: closing the largest remaining omission on the world Genome map. GigaScience. 2015;4:53. doi:10.1186/s13742-015-0095-0. https://gigascience.biomedcentral.com/articles/10.1186/s13742-015-0095-0, CC BY 4.0, https://commons.wikimedia.org/w/index.php?curid=56695551"}
+knitr::include_graphics("images/1000_Genomes_Project.svg.png")
+```
+
+
+
+## From the sequencer to analysis-ready data (10 min)
+
+The data file that comes out of the sequencer will look like this:
+
+> \@HWI-M01237:20:000000000-A5R87:1:1101:15995:1759 1:N:0:CCTAGGT
+>
+> TCTGAGGAGCTCTAATAACAAGCTCCATCTGCCTACGTCAAACCGACTTAAAAGCACTCAAGATCGGAAGTGCA...
+>
+> +HWI-M01237:20:000000000-A5R87:1:1101:15995:1759 1:N:0:CCTAGGT
+>
+> FFFFBD?11GGGGCGGB3B110AFGC1FFH1EAF1B0BA0/1AA//AAE1111101ABB0111ABA///?1B12...
+
+Strings of DNA base pairs, identifiers, and encoded information about the quality of the sequencing run. The data then undergoes quite a bit of processing before it can be used for analysis. The general pipeline is this:
+
+1.  First, the quality of the data is assessed to check see how well the sequencing went and how much we can trust the sequencer’s calls.
+2.  This can also include trimming of low-quality sequences or adapters (base pairs attached to the target DNA to aid in sequencing)
+3.   You may sequence “off-target” portions of DNA – these can be identified and/or removed by comparing your sequences to a large database
+4.   The sequence data is then mapped to a reference
+5.  Some intermediary steps like removing duplicate sequences, sorting, and indexing help make the following steps quicker
+6.   In areas where many reads are mapped but in which variation is present, variants are called. These may be variation at a single base pair (SNP), or variation across many base pairs (structural variation)
+7.   Variants are filtered and checked for quality, and be then be annotated and classified
+8.   Further analysis can now take place
+
+The pipeline can be represented in the figure below:
+
+
+```{r}
+#| out.width: "398px"
+knitr::include_graphics("images/analysis-pipeline.png")
+```
+
+
+
+Fastq format
+
+```
+less -S fastq/
+```
+
+### Aligning reads (15-20min)
+
+Let’s take a closer look at how some portions of the pipeline will look from the bioinformatic perspective. We can begin by aligning some reads from the sequencer –we will align a subset of reads to a gene called ABCG2. This is a gene on the fourth human chromosome that creates a protein involved in transport across cell membranes.
+
+**NB: CODE TO BE CLEANED/TESTED, NEED FILES?**
+
+`bwa mem in.ref fasta.1 fasta.2 > ./mapped_reads.sam`
+
+`samtools flagstat mapped_reads.sam`
+
+After this has finished, let’s take a look at the output with a viewer
+
+`samtools tview ./mapped_reads.sam`
+
+You can navigate with the arrow keys, or press `g` to jump to a particular region.
+
+We see that each read has been placed somewhere along the reference, there is a lot of overlap at each position. However, there is some variation present- some reads have one or more base pairs that are different from the reference sequence. When we have enough confidence that the different base pair is not an artifact of the sequencing, we call a variant – that is, identify a SNP – at that position.
+
+We can call variants along the entire genome to get a sense of how much variation is present in the sample(s) of interest. Unfortunately, we won’t have time to do any variant calling ourselves today, but you can already see the logic of how this works here.
+
+When you're ready, exit the viewer by pressing the <kbd>Q</kbd> key.
+
+<!-- data prep 
+```
+hom 0/0 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
+het 0/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam
+hom 1/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
+
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_ref_example.bam
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam 4:89051323-89053323 > rs2231142_het_example.bam
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_alt_example.bam
+samtools index -m *.bam
+
+# create the fastq data set
+samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam MT > example.bam
+samtools sort -n -o example.read_ordered.bam
+bedtools bamtofastq -i example_mt.read_ordered.bam -fq example.R1.fastq -fq2 example.R2.fastq
+
+bwa index ../../reference/human_g1k_v37.fasta
+bwa mem ../../reference/human_g1k_v37.fasta example.R1.fastq example.R2.fastq > example.sam
+
+```
+
+-->
+
+```
+aligned
+```
+
+
+
+```
+samtools tview rs2231142_hom_ref_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+
+```
+samtools tview rs2231142_het_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+
+```
+samtools tview rs2231142_hom_alt_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+```
+
+## VCF (20min)
+
+### Bam -> VCF (10)
+
+What is the VCF format?
+
+<!-- Murray to fill in with 3 sample example -->
+
+### HAplotype tree prep (10)
+
+
+Let’s create our own phylogenetic tree for some population in the database. Choose a population code from the table below and run the following code in `Terminal`:
+
+`grep "PEL" test_dir/1KGP-phase3-samples.txt | awk '{print $1}' > ./samples-of-interest.txt`
+
+NB: change `PEL` to any of the codes listed in the table below to select a particular population
+
+`bcftools view --samples-file test_dir/samples-of-interest.txt --output ./pop.chrMT.phase3_callmom-v0_4.20130502.genotypes.vcf.gz workshop_data/data/1KGP/ALL.chrMT.phase3_callmom-v0_4.20130502.genotypes.vcf.gz`
+
+|     |                                                               |
+|:---:|---------------------------------------------------------------|
+| ACB | African Caribbean in Barbados                                 |
+| ASW | African Ancestry in Southwest USA                             |
+| CDX | Chinese Dai in Xishuangbanna, China                           |
+| CEU | Utah residents with ancestry from northern and western Europe |
+| CHB | Han Chinese in Beijing, China                                 |
+| CHS | Han Chinese South, China                                      |
+| CLM | Colombian in Medellin, Colombia                               |
+| FIN | Finnish in Finland                                            |
+| GBR | British From England and Scotland, UK                         |
+| GIH | Gujarati Indians in Houston, Texas, USA                       |
+| IBS | Iberian populations in Spain                                  |
+| JPT | Japanese in Tokyo, Japan                                      |
+| KHV | Kinh in Ho Chi Minh City, Vietnam                             |
+| LWK | Luhya in Webuye, Kenya                                        |
+| MXL | Mexican Ancestry in Los Angeles, California, USA              |
+| PEL | Peruvian in Lima, Peru                                        |
+| PUR | Puerto Rican in Puerto Rico                                   |
+| TSI | Toscani in Italia                                             |
+| YRI | Yoruba in Ibadan, Nigeria                                     |
+
+: ^Table\ from\ Diroma\ et\ al.,\ 2014\ BMC\ Genomics\ (<https://doi.org/10.1186%2F1471-2164-15-S3-S2>)^
+
+
+## **Variants – what can we do with them?** (20min)
+
+Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the ABCG2 gene we mapped earlier:
+
+ensembl: 
+Genomic context: https://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Variant info: https://grch37.ensembl.org/Homo_sapiens/Variation/Explore?r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Population frequencies: https://grch37.ensembl.org/Homo_sapiens/Variation/Population?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+Phenotypes: https://grch37.ensembl.org/Homo_sapiens/Variation/Phenotype?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+
+
+dbsnp: https://www.ncbi.nlm.nih.gov/snp/rs2231142#frequency_tab
+
+
+**TBC: gnomAD browser? Some simple code?**
+
+https://gnomad.broadinstitute.org/variant/4-88131171-G-T?dataset=gnomad_r4
+
+1.  Is the frequency of this variant the same across the globe? Are there populations with a higher frequency than others?
+2.  Is this variant relevant to human health? Let’s explore some resources for finding information of clinical relevance.
+
+**TBC: ClinVar? dbSNP?**
+
+1.   Is the variant associated with any clinical conditions?
+
+## LOOK AT NANOPORE/break (10/15 min)
+
+
+
+# Appendix
+
+## BASH quick reference
+
+Navigation
+
+- `pwd` tells you where you are in the file system
+
+- `ls` will show you the names of files and directories where you are
+  - `ls -F` will append a `/` onto the end of the names that are directories
+
+- `cd` by itself will take you back to your home directory (`~/`)
+
+- `cd directory_name` will place you in that directory, e.g `cd ~/sing_guam` will move you to the workshop area if you got mis-placed
+
+- `./` infront of a file or directory means bash will look in the current directory (that shown by `pwd`)
+
+- `../` infront of a file or directory means the parent directory (look one directory "up"), `../../` means look "2-up", etc.
+
+
+
+## R reference
+
