@@ -13,25 +13,11 @@ format:
 
 
 
+
 ## Setup and Environment (10 min)
-
-The following is run in `Terminal` to load the needed software
-
-<!-- This will become a single script to hide the detail -->
-<!-- e.g. source ~/sing_guam/load_software.sh -->
-
-```
-cd sing_guam
-source load_software.sh
-```
-
-<!-- Include a picture of rstudio and through out include pictures to indicate which tab console/terminal people need to be in -->
 
 
 Below is a schematic of the structure of the workshop files and directories (folders)
-<!-- this structure is currently reflective of intention - will be updated once everything is ironed out -->
-
-
 
 
 ```
@@ -53,17 +39,54 @@ sing_guam/
 └── workshop_part2.qmd
 ```
 
+To the left in the `Files` tab you will see the directory for `sing_guam`, click on that and then click on the `sing_guam.Rproj` file. This will set RStudio to work from this directory by default.
+
+The first section of the workshop we're going to run some common bioinformatic tools. In a shared compute environment like the Otago OnDemand cluster, we need to load the software we want to use - to do that we have created a script that you will run in the `Terminal`:
+
+1. ensure that you are using the `Terminal` tab
+
+```{r}
+#| eval: false
+
+knitr::include_graphics("images/terminal_tab.png")
+```
+
+
+2. type the following into the `Terminal`
+
+```{bash}
+#| eval: false
+cd sing_guam
+source load_software.sh
+```
+
+
+
+
+
+
 ### What is the 1000 Genomes Project (10 min)
 
 
+The 1000 Genomes Project was an international consortium that was established in 2007 to provide a
+comprehensive record of human genetic variation (Siva, 2008). The project consisted of three main
+data phases. A pilot phase that whole-genome sequenced 179 individuals from four populations at low
+coverage (2-4x), along with high coverage sequencing for two trios (mother, father, and child), and exon
+targeted sequencing for 697 individuals from seven populations (1000 Genomes Project Consortium,
+2010). The second main data phase provided sequencing data for 1092 individuals from 14 populations.
+This sequencing data set was a combination of low coverage whole-genome and exon sequencing (1000
+Genomes Project Consortium, 2012). The third main phase (Phase 3) was a dataset consisting of low
+coverage whole-genome sequencing, deep exome sequencing, and dense SNP array genotyping for 2504
+individuals from 26 populations (1000 Genomes Project Consortium, 2015). The 1000 Genomes data
+set used in this workshop is from the Phase 3 release, and is publicly available from https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/.
 
-<!-- Very brief introduction into where the data being used comes from -->
+The below shows the names of the sample populations, and their location.
 
 ```{r, fig.cap="1000 Genomes Sample Populations. By Taras K. Oleksyk, Vladimir Brukhin and Stephen J. O’Brien - Oleksyk TK, Brukhin V, O’Brien SJ. The Genome Russia project: closing the largest remaining omission on the world Genome map. GigaScience. 2015;4:53. doi:10.1186/s13742-015-0095-0. https://gigascience.biomedcentral.com/articles/10.1186/s13742-015-0095-0, CC BY 4.0, https://commons.wikimedia.org/w/index.php?curid=56695551"}
 knitr::include_graphics("images/1000_Genomes_Project.svg.png")
 ```
 
-
+We're going to make use of a small subset of this data to show examples of some data types and bioinformatic analyses that can be done.
 
 ## From the sequencer to analysis-ready data (10 min)
 
@@ -100,17 +123,25 @@ knitr::include_graphics("images/analysis-pipeline.png")
 
 Fastq format
 
-```
+```{bash}
+#| eval: false
 less -S fastq/
 ```
 
 ### Aligning reads (15-20min)
 
-Let’s take a closer look at how some portions of the pipeline will look from the bioinformatic perspective. We can begin by aligning some reads from the sequencer –we will align a subset of reads to a gene called ABCG2. This is a gene on the fourth human chromosome that creates a protein involved in transport across cell membranes.
+Once we have reads from our sequencer of choice, we want to have an idea about where they come from in the genome. To do this we need to have the genome sequence - in our case this will be what is known as the human reference genome - while it is called a "reference", it does not represent the full diversity of variation found in humans but enables us to _align_ our sequencing reads by looking for regions in the reference that match (with some tolerance) to the sequence of our reads. We use alignement over genome assembly we we have access to a good enough genomic sequence as assembly is a very computationally intensive process.
+
+Let’s take a closer look at how some portions of the pipeline will look from the bioinformatic perspective. We can begin by aligning some reads from the sequencer –we will align a subset of reads to a gene called _ABCG2_. This is a gene on the fourth human chromosome that creates a protein involved in transport across cell membranes.
+
+
+The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq files, and also includes where in the genome the read mapped to plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file. The more efficient compressed binary version is the _bam_ file.
+
+
 
 **NB: CODE TO BE CLEANED/TESTED, NEED FILES?**
 
-`bwa mem in.ref fasta.1 fasta.2 > ./mapped_reads.sam`
+`bwa mem in.ref fastq.1 fastq.2 > ./mapped_reads.sam`
 
 `samtools flagstat mapped_reads.sam`
 
@@ -182,7 +213,10 @@ What is the VCF format?
 
 Let’s create our own phylogenetic tree for some population in the database. Choose a population code from the table below and run the following code in `Terminal`:
 
-`grep "PEL" test_dir/1KGP-phase3-samples.txt | awk '{print $1}' > ./samples-of-interest.txt`
+```{bash}
+#| eval: false
+grep "PEL" test_dir/1KGP-phase3-samples.txt | cut -f1 > ./samples-of-interest.txt
+```
 
 NB: change `PEL` to any of the codes listed in the table below to select a particular population
 
@@ -261,7 +295,10 @@ Navigation
 
 - `../` infront of a file or directory means the parent directory (look one directory "up"), `../../` means look "2-up", etc.
 
+Other utilities:
 
+- `grep` is a commandline program that can search for patters in files
+- `cut` lets you choose which columns you want to include from a file by adding `-f <column numbers>`
 
 ## R reference
 
