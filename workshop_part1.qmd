@@ -125,7 +125,9 @@ Fastq format
 
 ```{bash}
 #| eval: false
-less -S fastq/
+
+cd ~/sing_guam/fastq/
+less -S fastq/example.R1.fastq
 ```
 
 ### Aligning reads (15-20min)
@@ -138,10 +140,15 @@ Let’s take a closer look at how some portions of the pipeline will look from t
 The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq files, and also includes where in the genome the read mapped to plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file. The more efficient compressed binary version is the _bam_ file.
 
 
+```{bash}
+#| eval: false
 
-**NB: CODE TO BE CLEANED/TESTED, NEED FILES?**
+cd ~/sing_guam/aligned
 
-`bwa mem in.ref fastq.1 fastq.2 > ./mapped_reads.sam`
+bwa mem ../ref/human_g1k_v37.fasta ../fastq/example.R1.fastq ../fastqexample.R2.fastq > example.sam
+```
+
+
 
 `samtools flagstat mapped_reads.sam`
 
@@ -157,70 +164,81 @@ We can call variants along the entire genome to get a sense of how much variatio
 
 When you're ready, exit the viewer by pressing the <kbd>Q</kbd> key.
 
-<!-- data prep 
-```
-hom 0/0 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
-het 0/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam
-hom 1/1 https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam
 
-samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/alignment/HG00096.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_ref_example.bam
-samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam 4:89051323-89053323 > rs2231142_het_example.bam
-samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00111/alignment/HG00111.mapped.ILLUMINA.bwa.GBR.low_coverage.20120522.bam 4:89051323-89053323 > rs2231142_hom_alt_example.bam
-samtools index -m *.bam
 
-# create the fastq data set
-samtools -bh https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00102/alignment/HG00102.mapped.ILLUMINA.bwa.GBR.low_coverage.20130415.bam MT > example.bam
-samtools sort -n -o example.read_ordered.bam
-bedtools bamtofastq -i example_mt.read_ordered.bam -fq example.R1.fastq -fq2 example.R2.fastq
+```{bash}
+#| eval: false
 
-bwa index ../../reference/human_g1k_v37.fasta
-bwa mem ../../reference/human_g1k_v37.fasta example.R1.fastq example.R2.fastq > example.sam
-
+samtools tview rs2231142_hom_ref_example.bam -p 4:89052323 ../ref/human_g1k_v37.fasta
 ```
 
--->
+```{bash}
+#| eval: false
 
-```
-aligned
+samtools tview rs2231142_het_example.bam -p 4:89052323 ../ref/human_g1k_v37.fasta
 ```
 
 
+```{bash}
+#| eval: false
 
-```
-samtools tview rs2231142_hom_ref_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
-```
-
-
-```
-samtools tview rs2231142_het_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
-```
-
-
-```
-samtools tview rs2231142_hom_alt_example.bam -p 4:89052323 ../../reference/human_g1k_v37.fasta
+samtools tview rs2231142_hom_alt_example.bam -p 4:89052323 ../ref/human_g1k_v37.fasta
 ```
 
 ## VCF (20min)
 
+The _Variant Call Format_ is a file format that is a summarisation of one or more aligned samples. Each row is a variant. This format has 8 main columns:
+
+Name | Description
+---|---
+CHROM | Chromosome
+POS | Position/coordinate on the chromsome
+ID | Often a variant identifier
+REF | Reference allele at the position
+ALT | Alternative allele(s) observed at the position
+QUAL | Phred score as to likelihood of variant
+INFO | Contains overview statistics
+FORMAT | Describes order of fields found in each sample column
+
+Following these is a column per sample with the sample genotype and extra information at the sample level. Genotypes are represented as 0 = reference, 1 = alternate. For a diploid organism (such as humans) we get 0/0 for homozygous reference, 0/1 heterozygote, and 1/1 homozygous for the alternative allele.
+
+It's important to note that reference and alternative are purely in relation to what allele the reference genome contained and does not tell you anything about the commonality of the allele population-wise.
+
 ### Bam -> VCF (10)
 
-What is the VCF format?
+We aren't going to do the actual variant calling stage in this workshop as there are many different programs that are often used to accomplish this and is usually a multi-step process. Samtools, GATK, and Freebayes are the most common varint callers. The simplest method is a "pileup" where for each position of the genome a statistical model is applied to determine the likelihood of the genotype based on the number of reads for each allele present.
 
-<!-- Murray to fill in with 3 sample example -->
 
-### HAplotype tree prep (10)
+Instead we shall take a look at a VCF file that was made from the 3 example bams we just looked at but only for the position of the variant rs2231142.
+
+```{bash}
+#| eval: false
+
+cd ~/sing_guam/vcf
+
+less example.3_sample.vcf
+```
+
+
+Use the up/down arrow keys to scroll through this file.
+
+
+### Haplotype tree prep (10 min)
 
 
 Let’s create our own phylogenetic tree for some population in the database. Choose a population code from the table below and run the following code in `Terminal`:
 
 ```{bash}
 #| eval: false
-grep "PEL" test_dir/1KGP-phase3-samples.txt | cut -f1 > ./samples-of-interest.txt
+
+cd ~/sing_guam/vcf
+
+grep "PEL" 1kgp-phase3-samples.txt | cut -f1 > samples-of-interest.txt
 ```
 
 NB: change `PEL` to any of the codes listed in the table below to select a particular population
 
-`bcftools view --samples-file test_dir/samples-of-interest.txt --output ./pop.chrMT.phase3_callmom-v0_4.20130502.genotypes.vcf.gz workshop_data/data/1KGP/ALL.chrMT.phase3_callmom-v0_4.20130502.genotypes.vcf.gz`
+`bcftools view --samples-file samples-of-interest.txt --output pop.chrMT.vcf.gz 1kgp.chrMT.vcf.gz`
 
 |     |                                                               |
 |:---:|---------------------------------------------------------------|
@@ -251,26 +269,13 @@ NB: change `PEL` to any of the codes listed in the table below to select a parti
 
 Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the ABCG2 gene we mapped earlier:
 
-ensembl: 
-Genomic context: https://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
-Variant info: https://grch37.ensembl.org/Homo_sapiens/Variation/Explore?r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
-Population frequencies: https://grch37.ensembl.org/Homo_sapiens/Variation/Population?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
-Phenotypes: https://grch37.ensembl.org/Homo_sapiens/Variation/Phenotype?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488
+There are many online databases dedicated to recording genomic variation and providing more context or information about what is known about the variant. One such online database is [ensembl](https://ensembl.org). We can use this database to find out some more about our variant rs2231142 at [ensembl](https://ensembl.org). Use the links below to find out more:
 
+- [Genomic context](https://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
+- [Variant info](https://grch37.ensembl.org/Homo_sapiens/Variation/Explore?r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
+- [Population frequencies](https://grch37.ensembl.org/Homo_sapiens/Variation/Population?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
+- [Phenotypes](https://grch37.ensembl.org/Homo_sapiens/Variation/Phenotype?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
 
-dbsnp: https://www.ncbi.nlm.nih.gov/snp/rs2231142#frequency_tab
-
-
-**TBC: gnomAD browser? Some simple code?**
-
-https://gnomad.broadinstitute.org/variant/4-88131171-G-T?dataset=gnomad_r4
-
-1.  Is the frequency of this variant the same across the globe? Are there populations with a higher frequency than others?
-2.  Is this variant relevant to human health? Let’s explore some resources for finding information of clinical relevance.
-
-**TBC: ClinVar? dbSNP?**
-
-1.   Is the variant associated with any clinical conditions?
 
 ## LOOK AT NANOPORE/break (10/15 min)
 
@@ -294,6 +299,8 @@ Navigation
 - `./` infront of a file or directory means bash will look in the current directory (that shown by `pwd`)
 
 - `../` infront of a file or directory means the parent directory (look one directory "up"), `../../` means look "2-up", etc.
+
+- <kbd>TAB</kbd> for completing program and file names. As you are typing make frequent use of hitting the <kbd>TAB</kbd> key as it will try to auto-complete file names/paths which will prevent typos.
 
 Other utilities:
 
