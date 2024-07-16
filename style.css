@@ -1,3 +1,17 @@
+.quarto-title-block .quarto-title-banner {
+  background-image: url(images/sing_logo.png);
+  background-size: 300px;
+  background-position: right;
+  background-repeat: no-repeat;
+  padding-right: 10em;
+  background-origin: content-box;
+}
+
+header {
+  background-color: #004400;
+}
+
+
 body .page-columns {
     display: grid;
     gap: 0;

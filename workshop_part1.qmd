@@ -2,14 +2,33 @@
 title: "SING Bioinformatics Workshop - Part 1"
 format: 
   html:
+    title-block-banner: true
     toc: true
     toc-depth: 3
     toc-expand: true
     embed-resources: true
     theme: litera
+    css: style.css
 ---
 
+<style>
+.quarto-title-block .quarto-title-banner {
+  background-image: url(images/sing_logo.png);
+  background-size: 300px;
+  background-position: right;
+  background-repeat: no-repeat;
+  padding-right: 10em;
+  background-origin: content-box;
+}
 
+header {
+  background-color: #004400;
+}
+</style
+
+```{r}
+knitr::include_graphics("images/sing_logo.png")
+```
 
 
 
@@ -46,7 +65,8 @@ The first section of the workshop we're going to run some common bioinformatic t
 1. ensure that you are using the `Terminal` tab
 
 ```{r}
-#| eval: false
+#| echo: false
+#| out.width: 75%
 
 knitr::include_graphics("images/terminal_tab.png")
 ```
@@ -115,19 +135,45 @@ The pipeline can be represented in the figure below:
 
 
 ```{r}
-#| out.width: "398px"
+#| out.width: "75%"
 knitr::include_graphics("images/analysis-pipeline.png")
 ```
 
 
 
-Fastq format
+### Fastq format
+
+
+A fastq file contains the sequencing reads. Groups of 4 lines constitute a read. For a full description of the format see [https://en.wikipedia.org/wiki/FASTQ_format]()
+
+1. Starts with `@`, contains read meta data - often sequencing machine information
+2. read bases
+3. line starts `+` often rest is empty but can be used for more metea data
+4. base quality scores - encoded phred score ([https://en.wikipedia.org/wiki/Phred_quality_score]())
 
 ```{bash}
 #| eval: false
 
 cd ~/sing_guam/fastq/
 less -S fastq/example.R1.fastq
+```
+
+To exit less use the <kbd>Q</kbd> key.
+
+We can use tools such as Fastqc to summarise the quality of our sequencing
+
+```{bash}
+#| eval: false
+
+fastqc example.R1.fastq example.R2.fastq
+```
+
+After running this, use the file panel on the right to open example.R1_fastqc to visualise the quality of this sequence.
+
+```{r}
+#| echo: false
+
+knitr::include_graphics("images/fastqc_qual.png")
 ```
 
 ### Aligning reads (15-20min)
