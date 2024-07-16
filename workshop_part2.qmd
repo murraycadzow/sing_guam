@@ -2,11 +2,14 @@
 title: "SING Bioinformatics Workshop - Part 2"
 format: 
   html:
+    title-block-banner: true
     toc: true
     toc-depth: 3
     toc-expand: true
     embed-resources: true
     theme: litera
+    code-overflow: scroll
+    css: style.css
 ---
 
 
@@ -76,39 +79,74 @@ a sliding window to remove markers that had an inter-marker LD R2 > 0.2, with wi
 and a slide of 5 markers. The first 10 principle components were calculated using smartPCA v13050
 from Eigensoft v6.0.1 (Price et al., 2006). The following code was used to accomplish these steps.
 
+
+:::{.callout-note title="Generating PCA Data"}
 ```{bash}
 #| eval: false
 
-#combine the chromosomes
+# combine all chromosomes together
 bcftools concat \
--O z \
--o -o NZ_1KGP_allchr.vcf.gz \
---threads 10 $(ls NZ_1KGP.chr*gz | sort -n -t'r' -k2)
-#find the independent markers
-plink1.9b4.9 --vcf NZ_1KGP_allchr.vcf.gz \
---maf 0.1 \
---indep-pairwise 50 5 0.2 \
---out NZ_1KGP_allchr
+  --threads ${SLURM_CPUS_PER_TASK} \
+  -O z \
+  -o 1KGP_allchr.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr1.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr2.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr3.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr4.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr5.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr6.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr7.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr8.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr9.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr10.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr11.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr12.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr13.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr14.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr15.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr16.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr17.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr18.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr19.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr20.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr21.no_indel.biallelic.vcf.gz \
+  ${DATA_DIR}/ALL/ALL_chr22.no_indel.biallelic.vcf.gz 
+
+# find independent SNPs  
+plink \
+  --vcf 1KGP_allchr.vcf.gz \
+  --maf 0.1 \
+  --indep-pairwise 50 5 0.2 \
+  --out 1KGP_allchr
 
 # create an empty affection file that is required for 
 # Plink to use the --make-pheno
 # which in turn is required for the creation of the 
 # ped file just the way SmartPCA wants it
 touch cases.txt
-plink1.9b4.9 --vcf NZ_1KGP_allchr.vcf.gz \
---extract NZ_1KGP_allchr.prune.in \
---recode \
---out NZ_1KGP_allchr_indep \
---make-pheno cases.txt '*'
-# create the eigenstrat file
-echo -e "genotype: 1KGP_allchr_indep.ped\nsnpname: \
-1KGP_allchr_indep.map\nindivname: \
-1KGP_allchr_indep.ped\noutputformat: \
-EIGENSTRAT\ngenotypeoutname: \
-1KGP_allchr_indep.eigenstratgeno\nsnpoutname: \
-1KGP_allchr_indep.snp\nindivoutname: \
-1KGP_allchr_indep.ind\nfamilynames: \
-NO" > par.PED.EIGENSTRAT
+plink \
+  --vcf 1KGP_allchr.vcf.gz \
+  --extract 1KGP_allchr.prune.in \
+  --recode \
+  --out 1KGP_allchr_indep \
+  --make-pheno cases.txt '*'
+```
+
+Contents of `_par.PED.EIGENSTRAT_`:
+```
+genotype: 1KGP_allchr_indep.ped
+snpname: 1KGP_allchr_indep.map
+indivname: 1KGP_allchr_indep.ped
+outputformat: EIGENSTRAT
+genotypeoutname: 1KGP_allchr_indep.eigenstratgeno
+snpoutname: 1KGP_allchr_indep.snp
+indivoutname: 1KGP_allchr_indep.ind
+familynames: NO
+```
+
+```{bash}
+#| eval: false
+
 # calculate the principle components
 convertf -p par.PED.EIGENSTRAT > eigen.log
 smartpca.perl \
@@ -122,6 +160,8 @@ smartpca.perl \
 -m 0
 
 ```
+
+:::
 
 
 ```{r}
