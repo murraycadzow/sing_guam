@@ -8,27 +8,11 @@ format:
     toc-expand: true
     embed-resources: true
     theme: litera
+    code-overflow: scroll
     css: style.css
 ---
 
-<style>
-.quarto-title-block .quarto-title-banner {
-  background-image: url(images/sing_logo.png);
-  background-size: 300px;
-  background-position: right;
-  background-repeat: no-repeat;
-  padding-right: 10em;
-  background-origin: content-box;
-}
 
-header {
-  background-color: #004400;
-}
-</style
-
-```{r}
-knitr::include_graphics("images/sing_logo.png")
-```
 
 
 
@@ -39,24 +23,44 @@ knitr::include_graphics("images/sing_logo.png")
 Below is a schematic of the structure of the workshop files and directories (folders)
 
 
+:::{.callout-note title="Directory structure"}
 ```
 sing_guam/
-├── aligned/
-│   ├── example.rs2231142_het.bam
-│   ├── example.rs2231142_hom_alt.bam
-│   └── example.rs2231142_hom_ref.bam
-├── fastq/
-│   ├── example.R1.fq
-│   └── example.R2.fq
+├── aligned
+│   ├── rs2231142_het_example.bam
+│   ├── rs2231142_het_example.bam.bai
+│   ├── rs2231142_hom_alt_example.bam
+│   ├── rs2231142_hom_alt_example.bam.bai
+│   ├── rs2231142_hom_ref_example.bam
+│   └── rs2231142_hom_ref_example.bam.bai
+├── fastq
+│   ├── example.R1.fastq
+│   └── example.R2.fastq
+├── getting_started.html
+├── getting_started.qmd
 ├── load_software.sh
-├── ref/
-│   └── human_g1k_v37.fasta
-├── vcf/
+├── pca
+│   ├── 1kgp_allchr.indep_snp.pca.evec.tsv
+│   └── 1kgp-phase3-samples.txt
+├── ref
+│   ├── human_g1k_v37.fasta
+│   ├── human_g1k_v37.fasta.amb
+│   ├── human_g1k_v37.fasta.ann
+│   ├── human_g1k_v37.fasta.bwt
+│   ├── human_g1k_v37.fasta.pac
+│   └── human_g1k_v37.fasta.sa
+├── sing_guam.Rproj
+├── vcf
 │   ├── 1kgp.chrMT.vcf.gz
-│   └── example_3_sample.vcf
+│   ├── 1kgp.chrMT.vcf.gz.tbi
+│   ├── 1kgp-phase3-samples.txt
+│   └── example.3_sample.vcf
+├── workshop_part1.html
 ├── workshop_part1.qmd
+├── workshop_part2.html
 └── workshop_part2.qmd
 ```
+:::
 
 To the left in the `Files` tab you will see the directory for `sing_guam`, click on that and then click on the `sing_guam.Rproj` file. This will set RStudio to work from this directory by default.
 
@@ -66,7 +70,8 @@ The first section of the workshop we're going to run some common bioinformatic t
 
 ```{r}
 #| echo: false
-#| out.width: 75%
+#| out-width: 75%
+#| fig-align: center
 
 knitr::include_graphics("images/terminal_tab.png")
 ```
@@ -102,7 +107,12 @@ set used in this workshop is from the Phase 3 release, and is publicly available
 
 The below shows the names of the sample populations, and their location.
 
-```{r, fig.cap="1000 Genomes Sample Populations. By Taras K. Oleksyk, Vladimir Brukhin and Stephen J. O’Brien - Oleksyk TK, Brukhin V, O’Brien SJ. The Genome Russia project: closing the largest remaining omission on the world Genome map. GigaScience. 2015;4:53. doi:10.1186/s13742-015-0095-0. https://gigascience.biomedcentral.com/articles/10.1186/s13742-015-0095-0, CC BY 4.0, https://commons.wikimedia.org/w/index.php?curid=56695551"}
+```{r, }
+#| fig.cap: "1000 Genomes Sample Populations. By Taras K. Oleksyk, Vladimir Brukhin and Stephen J. O’Brien - Oleksyk TK, Brukhin V, O’Brien SJ. The Genome Russia project: closing the largest remaining omission on the world Genome map. GigaScience. 2015;4:53. doi:10.1186/s13742-015-0095-0. https://gigascience.biomedcentral.com/articles/10.1186/s13742-015-0095-0, CC BY 4.0, https://commons.wikimedia.org/w/index.php?curid=56695551"
+#| echo: false
+#| fig-align: center
+#| out-width: 90%
+
 knitr::include_graphics("images/1000_Genomes_Project.svg.png")
 ```
 
@@ -135,7 +145,11 @@ The pipeline can be represented in the figure below:
 
 
 ```{r}
-#| out.width: "75%"
+#| out-width: "75%"
+#| echo: false
+#| fig-align: center
+
+
 knitr::include_graphics("images/analysis-pipeline.png")
 ```
 
@@ -144,12 +158,12 @@ knitr::include_graphics("images/analysis-pipeline.png")
 ### Fastq format
 
 
-A fastq file contains the sequencing reads. Groups of 4 lines constitute a read. For a full description of the format see [https://en.wikipedia.org/wiki/FASTQ_format]()
+A fastq file contains the sequencing reads. Groups of 4 lines constitute a read. For a full description of the format see [https://en.wikipedia.org/wiki/FASTQ_format](https://en.wikipedia.org/wiki/FASTQ_format)
 
 1. Starts with `@`, contains read meta data - often sequencing machine information
 2. read bases
 3. line starts `+` often rest is empty but can be used for more metea data
-4. base quality scores - encoded phred score ([https://en.wikipedia.org/wiki/Phred_quality_score]())
+4. base quality scores - encoded phred score ([https://en.wikipedia.org/wiki/Phred_quality_score](https://en.wikipedia.org/wiki/Phred_quality_score))
 
 ```{bash}
 #| eval: false
@@ -172,9 +186,17 @@ After running this, use the file panel on the right to open example.R1_fastqc to
 
 ```{r}
 #| echo: false
+#| out-width: 75%
+#| fig-align: center
+#| fig-cap: "Example fastqc base quality output"
 
 knitr::include_graphics("images/fastqc_qual.png")
 ```
+
+:::{.callout-warning title="Quality Control"}
+The above image demonstrates a very common trend where the further into the sequence, the lower the quality of the data becomes. Additional quality control steps (such as trimming of reads) may be necessary to remove poor quality data.
+:::
+
 
 ### Aligning reads (15-20min)
 
@@ -183,7 +205,7 @@ Once we have reads from our sequencer of choice, we want to have an idea about w
 Let’s take a closer look at how some portions of the pipeline will look from the bioinformatic perspective. We can begin by aligning some reads from the sequencer –we will align a subset of reads to a gene called _ABCG2_. This is a gene on the fourth human chromosome that creates a protein involved in transport across cell membranes.
 
 
-The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq files, and also includes where in the genome the read mapped to plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file. The more efficient compressed binary version is the _bam_ file.
+The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq files, and also includes where in the genome the read mapped to plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file (see [https://en.wikipedia.org/wiki/SAM_(file_format)](https://en.wikipedia.org/wiki/SAM_(file_format) for more details on the format). The more efficient compressed binary version is the _bam_ file.
 
 
 ```{bash}
@@ -194,15 +216,19 @@ cd ~/sing_guam/aligned
 bwa mem ../ref/human_g1k_v37.fasta ../fastq/example.R1.fastq ../fastqexample.R2.fastq > example.sam
 ```
 
+After alignment, we can get some statistics about the mapping by using the `flagstat` argument to `samtools`
 
+```{bash}
+#| eval: false
 
-`samtools flagstat mapped_reads.sam`
+samtools flagstat example.sam
+```
 
 After this has finished, let’s take a look at the output with a viewer
 
-`samtools tview ./mapped_reads.sam`
+`samtools tview example.sam`
 
-You can navigate with the arrow keys, or press `g` to jump to a particular region.
+You can navigate with the arrow keys, or press <kbd>g</kbd> to jump to a particular region.
 
 We see that each read has been placed somewhere along the reference, there is a lot of overlap at each position. However, there is some variation present- some reads have one or more base pairs that are different from the reference sequence. When we have enough confidence that the different base pair is not an artifact of the sequencing, we call a variant – that is, identify a SNP – at that position.
 
@@ -231,9 +257,16 @@ samtools tview rs2231142_het_example.bam -p 4:89052323 ../ref/human_g1k_v37.fast
 samtools tview rs2231142_hom_alt_example.bam -p 4:89052323 ../ref/human_g1k_v37.fasta
 ```
 
-## VCF (20min)
+## Variant calling (20min)
 
-The _Variant Call Format_ is a file format that is a summarisation of one or more aligned samples. Each row is a variant. This format has 8 main columns:
+We aren't going to do the actual variant calling stage in this workshop as there are many different programs that are often used to accomplish this and is usually a multi-step process. Samtools, GATK, and Freebayes are the most common varint callers. The simplest method is a "pileup" where for each position of the genome a statistical model is applied to determine the likelihood of the genotype based on the number of reads for each allele present.
+
+
+
+
+### VCF (10min)
+
+The most common output from these tools is the _Variant Call Format (VCF)_ which is a file format ([https://en.wikipedia.org/wiki/Variant_Call_Format](https://en.wikipedia.org/wiki/Variant_Call_Format)) that is a summarisation of one or more aligned samples. The file has a head which contains metadata where each line starts with `##`. Following this, is the data where each row is a variant. This format has 8 main columns:
 
 Name | Description
 ---|---
@@ -249,11 +282,6 @@ FORMAT | Describes order of fields found in each sample column
 Following these is a column per sample with the sample genotype and extra information at the sample level. Genotypes are represented as 0 = reference, 1 = alternate. For a diploid organism (such as humans) we get 0/0 for homozygous reference, 0/1 heterozygote, and 1/1 homozygous for the alternative allele.
 
 It's important to note that reference and alternative are purely in relation to what allele the reference genome contained and does not tell you anything about the commonality of the allele population-wise.
-
-### Bam -> VCF (10)
-
-We aren't going to do the actual variant calling stage in this workshop as there are many different programs that are often used to accomplish this and is usually a multi-step process. Samtools, GATK, and Freebayes are the most common varint callers. The simplest method is a "pileup" where for each position of the genome a statistical model is applied to determine the likelihood of the genotype based on the number of reads for each allele present.
-
 
 Instead we shall take a look at a VCF file that was made from the 3 example bams we just looked at but only for the position of the variant rs2231142.
 
@@ -311,9 +339,9 @@ NB: change `PEL` to any of the codes listed in the table below to select a parti
 : ^Table\ from\ Diroma\ et\ al.,\ 2014\ BMC\ Genomics\ (<https://doi.org/10.1186%2F1471-2164-15-S3-S2>)^
 
 
-## **Variants – what can we do with them?** (20min)
+## Variants – what can we do with them? (20min)
 
-Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the ABCG2 gene we mapped earlier:
+Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the _ABCG2_ gene we mapped earlier:
 
 There are many online databases dedicated to recording genomic variation and providing more context or information about what is known about the variant. One such online database is [ensembl](https://ensembl.org). We can use this database to find out some more about our variant rs2231142 at [ensembl](https://ensembl.org). Use the links below to find out more:
 
@@ -353,5 +381,5 @@ Other utilities:
 - `grep` is a commandline program that can search for patters in files
 - `cut` lets you choose which columns you want to include from a file by adding `-f <column numbers>`
 
-## R reference
+
 
