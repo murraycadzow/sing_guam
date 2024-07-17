@@ -97,32 +97,27 @@ plink \
   --make-pheno cases.txt '*'
 ```
 
-Contents of `_par.PED.EIGENSTRAT_`:
+Contents of `_1KGP_allchr_indep_eigen.pca.par_`:
 ```
-genotype: 1KGP_allchr_indep.ped
-snpname: 1KGP_allchr_indep.map
-indivname: 1KGP_allchr_indep.ped
-outputformat: EIGENSTRAT
-genotypeoutname: 1KGP_allchr_indep.eigenstratgeno
-snpoutname: 1KGP_allchr_indep.snp
-indivoutname: 1KGP_allchr_indep.ind
-familynames: NO
+genotypename: 1KGP_allchr_indep.eigenstratgeno
+snpname: 1KGP_allchr_indep.snp
+indivname: 1KGP_allchr_indep.ind
+evecoutname: 1KGP_allchr_indep_eigen.pca.evec
+evaloutname: 1KGP_allchr_indep_eigen.eval
+altnormstyle: NO
+numoutevec: 10
+numoutlieriter: 0
+numoutlierevec: 10
+outliersigmathresh: 6
+qtmode: 0
+snpweightoutname: example.snpwt
 ```
 
 ```{bash}
 #| eval: false
 
 # calculate the principle components
-convertf -p par.PED.EIGENSTRAT > eigen.log
-smartpca.perl \
--i 1KGP_allchr_indep.eigenstratgeno \
--a 1KGP_allchr_indep.snp \
--b 1KGP_allchr_indep.ind \
--o 1KGP_allchr_indep_eigen.pca \
--p 1KGP_allchr_indep_eigen \
--e 1KGP_allchr_indep_eigen.eval \
--l 1KGP_allchr_indep_eigen.log \
--m 0
+smartpca -p 1KGP_allchr_indep_eigen.pca.par > smartpca.log
 
 tr -s ' ' < 1KGP_allchr_indep_eigen.pca.evec | sed 's/^ //g' | tr ' ' '\t' > 1kgp_allchr.indep_snp.pca.evec.tsv
 ```
@@ -301,3 +296,5 @@ RStudio's GUI is generally easy to navigate:
 - In the lower right, the 'Plots' tab will show you the last plot you created
 
 - On the lower left, you can switch between the `Terminal` tab for BASH and `Console` for R code
+
+If you want to learn more R take a look through [https://datacarpentry.org/R-ecology-lesson/](https://datacarpentry.org/R-ecology-lesson/)

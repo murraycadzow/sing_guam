@@ -15,9 +15,12 @@ format:
 
 
 
-
-
 ## Setup and Environment (10 min)
+
+
+:::{.callout-note title="Workshop"}
+The code that created this workshop can be found at [https://github.com/murraycadzow/sing_guam](https://github.com/murraycadzow/sing_guam) and contains a script that will help recreate the workshop in a Unix environment outside of the Otago OnDemand system used at SING Micronesia.
+:::
 
 
 Below is a schematic of the structure of the workshop files and directories (folders)
@@ -425,3 +428,4 @@ Other utilities:
 - `grep` is a commandline program that can search for patters in files
 - `cut` lets you choose which columns you want to include from a file by adding `-f <column numbers>`
 
+For more on BASH, take a looke at [https://swcarpentry.github.io/shell-novice/](https://swcarpentry.github.io/shell-novice/)
