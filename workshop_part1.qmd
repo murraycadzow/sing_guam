@@ -144,7 +144,7 @@ We can have a quick look at these files:
 #| eval: false
 
 cd ~/sing_guam/fastq/
-less -S fastq/example.R1.fastq
+less -S example.R1.fastq
 ```
 
 When you're done exploring, you can exit the viewer by pressing the <kbd>Q</kbd> key.
@@ -187,7 +187,7 @@ A fastq file contains the sequencing reads. Groups of 4 lines constitute a read.
 #| eval: false
 
 cd ~/sing_guam/fastq/
-less -S fastq/example.R1.fastq
+less -S example.R1.fastq
 ```
 
 To exit less use the <kbd>Q</kbd> key.
