@@ -8,9 +8,12 @@
 }
 
 header {
-  background-color: #004400;
+  background-color: #046A38;
 }
 
+.quarto-title-meta-author {
+	color: #FFFFFF;
+}
 
 body .page-columns {
     display: grid;

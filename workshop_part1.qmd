@@ -2,7 +2,9 @@
 title: "SING Bioinformatics Workshop - Part 1"
 author: 
   - name: Murray Cadzow
+    affiliations: University of Otago
   - name: Pascale Lubbe
+    affiliations: University of Otago
 format: 
   html:
     title-block-banner: true
