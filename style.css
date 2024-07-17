@@ -1,0 +1,26 @@
+.quarto-title-block .quarto-title-banner {
+  background-image: url(images/sing_logo.png);
+  background-size: 300px;
+  background-position: right;
+  background-repeat: no-repeat;
+  padding-right: 10em;
+  background-origin: content-box;
+}
+
+header {
+  background-color: #004400;
+}
+
+
+body .page-columns {
+    display: grid;
+    gap: 0;
+    grid-template-columns: [screen-start] 1.5em [screen-start-inset] 3fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(500px, calc(1000px - 3em)) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end];
+}
+
+h2 {
+  padding: 4em 0 0 0 
+}
+h3 {
+  padding: 2em 0 0 0
+}
