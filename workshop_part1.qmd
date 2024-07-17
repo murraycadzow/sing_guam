@@ -70,12 +70,15 @@ source load_software.sh
 
 The 1000 Genomes Project was an international consortium that was established in 2007 to provide a
 comprehensive record of human genetic variation (Siva, 2008). The project consisted of three main
-data phases. A pilot phase that whole-genome sequenced 179 individuals from four populations at low
+data phases. 
+A pilot phase that whole-genome sequenced 179 individuals from four populations at low
 coverage (2-4x), along with high coverage sequencing for two trios (mother, father, and child), and exon
 targeted sequencing for 697 individuals from seven populations (1000 Genomes Project Consortium,
-2010). The second main data phase provided sequencing data for 1092 individuals from 14 populations.
+2010). 
+The second main data phase provided sequencing data for 1092 individuals from 14 populations.
 This sequencing data set was a combination of low coverage whole-genome and exon sequencing (1000
-Genomes Project Consortium, 2012). The third main phase (Phase 3) was a dataset consisting of low
+Genomes Project Consortium, 2012). 
+The third main phase (Phase 3) was a dataset consisting of low
 coverage whole-genome sequencing, deep exome sequencing, and dense SNP array genotyping for 2504
 individuals from 26 populations (1000 Genomes Project Consortium, 2015). The 1000 Genomes data
 set used in this workshop is from the Phase 3 release, and is publicly available from https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/.
@@ -94,22 +97,35 @@ The data file that comes out of the sequencer will look like this:
 
 > \@HWI-M01237:20:000000000-A5R87:1:1101:15995:1759 1:N:0:CCTAGGT
 >
-> TCTGAGGAGCTCTAATAACAAGCTCCATCTGCCTACGTCAAACCGACTTAAAAGCACTCAAGATCGGAAGTGCA...
+> TCTGAGGAGCTCTAATAACAAGCTCCATCTGCCTACGT
+CAAACCGACTTAAAAGCACTCAAGATCGGAAGTGCA...
 >
 > +HWI-M01237:20:000000000-A5R87:1:1101:15995:1759 1:N:0:CCTAGGT
 >
-> FFFFBD?11GGGGCGGB3B110AFGC1FFH1EAF1B0BA0/1AA//AAE1111101ABB0111ABA///?1B12...
+> FFFFBD?11GGGGCGGB3B110AFGC1FFH1EAF1B0B
+A0/1AA//AAE1111101ABB0111ABA///?1B12...
 
-Strings of DNA base pairs, identifiers, and encoded information about the quality of the sequencing run. The data then undergoes quite a bit of processing before it can be used for analysis. The general pipeline is this:
+We can have a quick look at these files:
+
+```{bash}
+#| eval: false
+
+cd ~/sing_guam/fastq/
+less -S fastq/example.R1.fastq
+```
+
+When you're done exploring, you can exit the viewer by pressing the <kbd>Q</kbd> key.
+
+The file contain strings of DNA base pairs, identifiers, and encoded information about the quality of the sequencing run. The raw data undergoes quite a bit of processing before it can be used for analysis. The general pipeline looks like this:
 
 1.  First, the quality of the data is assessed to check see how well the sequencing went and how much we can trust the sequencer’s calls.
-2.  This can also include trimming of low-quality sequences or adapters (base pairs attached to the target DNA to aid in sequencing)
-3.   You may sequence “off-target” portions of DNA – these can be identified and/or removed by comparing your sequences to a large database
-4.   The sequence data is then mapped to a reference
-5.  Some intermediary steps like removing duplicate sequences, sorting, and indexing help make the following steps quicker
-6.   In areas where many reads are mapped but in which variation is present, variants are called. These may be variation at a single base pair (SNP), or variation across many base pairs (structural variation)
-7.   Variants are filtered and checked for quality, and be then be annotated and classified
-8.   Further analysis can now take place
+2.  This can also include trimming of low-quality sequences or adapters (base pairs attached to the target DNA to aid in sequencing).
+3.   You might end up sequencing “off-target” portions of DNA – these can be identified and/or removed by comparing your sequences to a large database.
+4.   The sequence data is mapped to a reference.
+5.  Some intermediary steps are performed like removing duplicate sequences, sorting, and indexing. 
+6.   In areas where many reads are mapped and genetic variation is present, variants are called. These may be variation at a single base pair (SNP), or across many base pairs (structural variation).
+7.   Variants are filtered and checked for quality, and possibly annotated and classified.
+8.   Further analysis can now take place.
 
 The pipeline can be represented in the figure below:
 
@@ -120,24 +136,14 @@ knitr::include_graphics("images/analysis-pipeline.png")
 ```
 
 
-
-Fastq format
-
-```{bash}
-#| eval: false
-
-cd ~/sing_guam/fastq/
-less -S fastq/example.R1.fastq
-```
-
 ### Aligning reads (15-20min)
 
-Once we have reads from our sequencer of choice, we want to have an idea about where they come from in the genome. To do this we need to have the genome sequence - in our case this will be what is known as the human reference genome - while it is called a "reference", it does not represent the full diversity of variation found in humans but enables us to _align_ our sequencing reads by looking for regions in the reference that match (with some tolerance) to the sequence of our reads. We use alignement over genome assembly we we have access to a good enough genomic sequence as assembly is a very computationally intensive process.
+Once we have reads from our sequencer of choice, we want to have an idea about where they come from in the genome. To do this we need to have the genome sequence - in our case this will be what is known as the human reference genome - while it is called a "reference", it does not represent the full diversity of variation found in humans but enables us to _align_ our sequencing reads by looking for regions in the reference that match (with some tolerance) to the sequence of our reads. We use alignment over genome assembly if we have access to a good enough genomic sequence, as assembly is a very computationally intensive process.
 
 Let’s take a closer look at how some portions of the pipeline will look from the bioinformatic perspective. We can begin by aligning some reads from the sequencer –we will align a subset of reads to a gene called _ABCG2_. This is a gene on the fourth human chromosome that creates a protein involved in transport across cell membranes.
 
 
-The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq files, and also includes where in the genome the read mapped to plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file. The more efficient compressed binary version is the _bam_ file.
+The tool we use for aligning is the _burrows-wheeler aligner_ or `bwa`. It takes the fastq files and finds the best match of each read to the reference sequence, and then outputs a file that has read information from the fastq filess. The output also includes where in the genome the read mapped to, plus how well it mapped/matched. This is stored in a _sequence alignment map (SAM)_ file. The more efficient compressed binary version is the _bam_ file.
 
 
 ```{bash}
@@ -148,19 +154,19 @@ cd ~/sing_guam/aligned
 bwa mem ../ref/human_g1k_v37.fasta ../fastq/example.R1.fastq ../fastqexample.R2.fastq > example.sam
 ```
 
-
+After this has finished, we can get some information about the quality of our mapping with the following tool:
 
 `samtools flagstat mapped_reads.sam`
 
-After this has finished, let’s take a look at the output with a viewer
+Let’s take a look at the output of mapping with a viewer:
 
 `samtools tview ./mapped_reads.sam`
 
 You can navigate with the arrow keys, or press `g` to jump to a particular region.
 
-We see that each read has been placed somewhere along the reference, there is a lot of overlap at each position. However, there is some variation present- some reads have one or more base pairs that are different from the reference sequence. When we have enough confidence that the different base pair is not an artifact of the sequencing, we call a variant – that is, identify a SNP – at that position.
+We see that each read has been placed somewhere along the reference, and there is a lot of overlap at each position. However, there is some variation present- some reads have one or more base pairs that are different from the reference sequence. When we have enough confidence that the different base pair is not an artifact of the sequencing, we call a variant – that is, identify a SNP – at that position.
 
-We can call variants along the entire genome to get a sense of how much variation is present in the sample(s) of interest. Unfortunately, we won’t have time to do any variant calling ourselves today, but you can already see the logic of how this works here.
+We can call variants along the entire genome to get a sense of how much variation is present in the sample(s) of interest. Unfortunately, we won’t have time to do any variant calling ourselves today, but you can see the logic of how this works here.
 
 When you're ready, exit the viewer by pressing the <kbd>Q</kbd> key.
 
@@ -226,7 +232,9 @@ Use the up/down arrow keys to scroll through this file.
 ### Haplotype tree prep (10 min)
 
 
-Let’s create our own phylogenetic tree for some population in the database. Choose a population code from the table below and run the following code in `Terminal`:
+Later on, we'll create our own phylogenetic tree for a population in the database. While we're looking through an example VCF, we'll run a subsetting function on the 1000 Genomes data to just one population. Subsetting is commonly applied to VCFs - you can select certain individuals, population groups, or even regions of the genome.
+
+Choose a population code from the table below and run the following in `Terminal`:
 
 ```{bash}
 #| eval: false
@@ -236,9 +244,7 @@ cd ~/sing_guam/vcf
 grep "PEL" 1kgp-phase3-samples.txt | cut -f1 > samples-of-interest.txt
 ```
 
-NB: change `PEL` to any of the codes listed in the table below to select a particular population
-
-`bcftools view --samples-file samples-of-interest.txt --output pop.chrMT.vcf.gz 1kgp.chrMT.vcf.gz`
+NB: change `PEL` to any of the codes listed in the table below to select a particular population:
 
 |     |                                                               |
 |:---:|---------------------------------------------------------------|
@@ -264,12 +270,28 @@ NB: change `PEL` to any of the codes listed in the table below to select a parti
 
 : ^Table\ from\ Diroma\ et\ al.,\ 2014\ BMC\ Genomics\ (<https://doi.org/10.1186%2F1471-2164-15-S3-S2>)^
 
+Again in `Terminal`, run the following:
 
-## **Variants – what can we do with them?** (20min)
+```{bash}
+#| eval: false
+
+bcftools view --samples-file samples-of-interest.txt --output pop.chrMT.vcf.gz 1kgp.chrMT.vcf.gz
+```
+
+We'll come back to this file a bit later on, but you can take a look at your subsetted VCF file in the same way we did before with:
+
+```{bash}
+#| eval: false
+
+less 1kgp.chrMT.vcf.gz
+```
+
+
+## Variants – what can we do with them? (20min)
 
 Once you’ve mapped reads and called your variants, what does one do with them? How does one use this data? Let’s assume we’re working with human data in a medical genetics context. We’ve identified a variant that seems to be associated a particular clinical outcome. We might be interested to know what the allele frequency of this variant is (i.e., how common is it?) Let’s assess the frequency of a variant called rs2231142, which is located in the ABCG2 gene we mapped earlier:
 
-There are many online databases dedicated to recording genomic variation and providing more context or information about what is known about the variant. One such online database is [ensembl](https://ensembl.org). We can use this database to find out some more about our variant rs2231142 at [ensembl](https://ensembl.org). Use the links below to find out more:
+There are many online databases dedicated to recording genomic variation and providing more context or information about what is known about the variant. One such online database is [ensembl](https://ensembl.org). We can use this database to find out some more about our variant rs2231142 at [ensembl](https://ensembl.org). We'll use the links below to find out more:
 
 - [Genomic context](https://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
 - [Variant info](https://grch37.ensembl.org/Homo_sapiens/Variation/Explore?r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
@@ -277,7 +299,7 @@ There are many online databases dedicated to recording genomic variation and pro
 - [Phenotypes](https://grch37.ensembl.org/Homo_sapiens/Variation/Phenotype?db=core;r=4:89051823-89052823;v=rs2231142;vdb=variation;vf=253533488)
 
 
-## LOOK AT NANOPORE/break (10/15 min)
+## Nanopore break (10/15 min)
 
 
 
@@ -306,6 +328,4 @@ Other utilities:
 
 - `grep` is a commandline program that can search for patters in files
 - `cut` lets you choose which columns you want to include from a file by adding `-f <column numbers>`
-
-## R reference
 
