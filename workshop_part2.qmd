@@ -13,12 +13,6 @@ format:
 ---
 
 
-```{r}
-.libPaths("/projects/teaching/sing_guam/workshop_env/R/")
-# install.packages("PACKAGE", lib = "/projects/teaching/sing_guam/workshop_env/R/")
-library(tidyverse)
-```
-
 
 
 
@@ -62,25 +56,21 @@ NB: change `PEL` to any of the codes listed in the table below to select a parti
 
 We might want to visualize what variation looks like in different populations across the entire genome. We can do this with a technique called a Principal Components Analysis (PCA). This type of analysis allows us to assess the relationships between groups on a geometric scale. Generally speaking, groups that are more similar will be closer together on a PCA plot, while groups that are more different will be further apart.
 
-MORE TO FILL IN HERE
-
-
 Principal component analysis is a statistical dimension reduction technique that transforms potentially
 correlated variables into a linear and non-correlated set of variables. In a genetic context PCA is
 used to reduce variation at many thousands of markers into a handful of components that represent
-the majority of the variation of the data (Patterson et al., 2006). The components are ordered such
+the majority of the variation of the data. The components are ordered such
 that the first principal component (PC) captures the most variation, with each subsequent component
 capturing less. These components often, but not necessarily, represent population differences and
 population substructure.
 
-To calculate the principal components of the genetic data, all populations and chromosomes were combined into a single VCF
-file with BCFtools v1.3.1, and then the independent markers were identified via Plink v1.9b4.9, using
+To calculate the principal components of the genetic data, all populations and chromosomes from the 1000 Genomes Project (Phase3 release) were combined into a single VCF file with BCFtools ([https://samtools.github.io/bcftools/](https://samtools.github.io/bcftools/)), and then the independent markers were identified via Plink v1.9 ([https://www.cog-genomics.org/plink/](https://www.cog-genomics.org/plink/)), using
 a sliding window to remove markers that had an inter-marker LD R2 > 0.2, with windows of 50 kb
 and a slide of 5 markers. The first 10 principle components were calculated using smartPCA v13050
-from Eigensoft v6.0.1 (Price et al., 2006). The following code was used to accomplish these steps.
+from Eigensoft v6.0.1 ([https://github.com/chrchang/eigensoft/](https://github.com/chrchang/eigensoft/)). The following code was used to accomplish these steps.
 
 
-:::{.callout-note title="Generating PCA Data"}
+:::{.callout-note title="Generating PCA Data" collapse="true"}
 ```{bash}
 #| eval: false
 
@@ -164,11 +154,40 @@ smartpca.perl \
 :::
 
 
-```{r}
-pca_data <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", col_names = c("sample", paste0("PC",1:10),"case_control"), comment = "#", col_select = -"case_control") %>% left_join(
-read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/integrated_call_samples_v3.20130502.ALL.panel", col_names = TRUE, col_select = c("sample", "pop","super_pop")), by = "sample")
+For this section ensure you are using the R Console tab
 
-pc_loadings <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", col_names = FALSE, n_max = 1)
+```{r}
+#| echo: false
+#| out-width: 75%
+#| fig-align: center
+ 
+knitr::include_graphics("images/console_tab.png")
+```
+
+
+
+```{r}
+#| messages: false
+#| warning: false
+library(tidyverse)
+```
+
+
+
+```{r}
+#| warning: false
+#| message: false
+pca_data <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", 
+  col_names = c("sample", paste0("PC",1:10),"case_control"), 
+  comment = "#", 
+  col_select = -"case_control") %>% left_join(read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/integrated_call_samples_v3.20130502.ALL.panel", 
+  col_names = TRUE, 
+  col_select = c("sample", "pop","super_pop")), 
+  by = "sample")
+
+pc_loadings <- read_delim("/projects/teaching/sing_guam/workshop_data/data/1KGP/PCA/1KGP_allchr_indep_eigen.pca.evec.tsv", 
+  col_names = FALSE, 
+  n_max = 1)
 ```
 
 ```{r}
@@ -187,8 +206,8 @@ Investigate different PCs to see which combinations are best to visualise separa
 
 # Use this template code
 ggplot(data = pca_data, 
-       aes(x = PC1, # change
-           y = PC2, # change
+       aes(x = PC1, # change the number (1-10)
+           y = PC2, # change the number (1-10)
            colour = super_pop)) + geom_point()
 ```
 
