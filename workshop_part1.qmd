@@ -1,5 +1,8 @@
 ---
 title: "SING Bioinformatics Workshop - Part 1"
+author: 
+  - name: Murray Cadzow
+  - name: Pascale Lubbe
 format: 
   html:
     title-block-banner: true
