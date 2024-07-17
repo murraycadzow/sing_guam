@@ -1,5 +1,4 @@
-# $1 is the account list file
-
+# Change this location for outside of the the SING Micronesia
 BASE=/projects/teaching/sing_guam
 
 ## Make conda available
@@ -48,8 +47,3 @@ rm ALL.chr4.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes.vcf.gz.tbi
 
 wget -O 1kgp-phase3-samples.txt http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20130502.ALL.panel
 
-## Create a working area for each account
-for account in $(cat $1)
-do
-	echo ${account}
-done
